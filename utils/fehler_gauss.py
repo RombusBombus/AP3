@@ -1,6 +1,7 @@
 import numpy as np
 from sympy import lambdify, diff
 
+
 def fehler_gauss(formula, dependent_symbols, values, uncertainties, print_errors=False):
     u_formula = 0
     formula_l = lambdify(dependent_symbols, formula)
@@ -13,3 +14,20 @@ def fehler_gauss(formula, dependent_symbols, values, uncertainties, print_errors
         u_formula += _u
 
     return formula_l(*values), np.sqrt(u_formula)
+
+
+
+def weighted_mean(measurements, uncertainties):
+
+    weights = 1 / uncertainties**2
+
+    weighted_mean = np.dot(measurements, weights) / weights.sum()
+
+    n = measurements.shape[0]
+
+    internal_uncertainty = np.sqrt(1/weights.sum())
+    external_uncertainty = np.sqrt(np.dot(weights, (measurements - weighted_mean)**2) / ((n-1)*weights.sum()))
+
+    uncertainty = max(internal_uncertainty, external_uncertainty)
+
+    return weighted_mean, uncertainty
